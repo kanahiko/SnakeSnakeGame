@@ -6,15 +6,16 @@ public class GameMaster : MonoBehaviour {
     
     public GameObject blockPrefab;
 
-    public Vector3[] fieldCoords= new Vector3[2];
+    public static Vector3[] fieldCoords= new Vector3[2];
 
     //current score of a game
-    public int foodEaten = 0;
+    public static int foodEaten = 0;
 
     public FoodPool pool;
 
     public static SnakeController snakeController;
     public static GameObject snake;
+    MobileControls mobileControls;
 
     public static bool hasCollided = false;
 
@@ -47,15 +48,16 @@ public class GameMaster : MonoBehaviour {
         hasCollided = false;
         foodObj = null;
         isCongradulated = false;
-
+        foodEaten = 0;
         snakeController = transform.GetComponent<SnakeController>();
 
         snakeController.DestroySnake();
         snakeController.CreateSnake();
 
         snake = transform.GetChild(0).gameObject;
+        mobileControls = GetComponent<MobileControls>();
 
-        //pool
+         //pool
         CreatePlayField();
         if (pool)
         {
@@ -81,11 +83,11 @@ public class GameMaster : MonoBehaviour {
             if (foodEaten > recordScore)
             {
                 recordScore = foodEaten;
-                transform.GetComponent<MobileControls>().ChangeRecordScore(recordScore);
+                mobileControls.ChangeRecordScore(recordScore);
                 if (!isCongradulated)
                 {
                     isCongradulated = true;
-                    transform.GetComponent<MobileControls>().ShowCongratulationText();
+                    mobileControls.ShowCongratulationText();
                 }
             }
         }
@@ -95,7 +97,6 @@ public class GameMaster : MonoBehaviour {
     {
         //if already generated then return
         if (background) return;
-
 
         int[] fieldSize = new int[2];
         fieldSize[0] = (int) Camera.main.ScreenToWorldPoint(new Vector2(Screen.width, Screen.height)).x *2;
@@ -173,10 +174,10 @@ public class GameMaster : MonoBehaviour {
         //generate new food and block
         foodEaten++;
 
-        transform.GetComponent<MobileControls>().ChangeScore(foodEaten);
+        mobileControls.ChangeScore(foodEaten);
 
-        transform.GetComponent<SnakeController>().IncreaseSpeed();
-        transform.GetComponent<SnakeController>().AddTailPart();
+        snakeController.IncreaseSpeed();
+        snakeController.AddTailPart();
 
         pool.ReturnFood(food);
 
@@ -191,12 +192,13 @@ public class GameMaster : MonoBehaviour {
         fieldSize[0] = fieldCoords[1].x / 6f;
         fieldSize[1] = fieldCoords[1].y/6f;
 
+        Vector2 snakeCoords = snakeController.transform.GetChild(0).position;
 
         //generating random x
         screenCoords.x = Random.Range(fieldCoords[0].x+ transform.localScale.x/1.5f, fieldCoords[1].x-transform.localScale.x/ 1.5f);
         //if that x is not under or below snake head then generate random y
-        if (screenCoords.x < snakeController.transform.GetChild(0).position.x - fieldSize[0] ||
-            screenCoords.x > snakeController.transform.GetChild(0).position.x+ fieldSize[0])
+        if (screenCoords.x < snakeCoords.x - fieldSize[0] ||
+            screenCoords.x > snakeCoords.x+ fieldSize[0])
         {
             screenCoords.y= Random.Range(fieldCoords[0].y+ transform.localScale.x/ 1.5f, fieldCoords[1].y- transform.localScale.x/ 1.5f);
 ;
@@ -207,16 +209,16 @@ public class GameMaster : MonoBehaviour {
             //or if upper boundary of snake head below upper boundary of field and rando, number greater than 50
             //then generate y above snake head
             //otherwise below
-            if ((fieldCoords[0].y> snakeController.transform.GetChild(0).position.y - fieldSize[1]) ||
-               !(fieldCoords[1].y<snakeController.transform.GetChild(0).position.y + fieldSize[1]) &&( Random.Range(0,100)>50))
+            if ((fieldCoords[0].y> snakeCoords.y - fieldSize[1]) ||
+               !(fieldCoords[1].y< snakeCoords.y + fieldSize[1]) &&( Random.Range(0,100)>50))
             {
-                screenCoords.y = Random.Range(fieldSize[1] + snakeController.transform.GetChild(0).position.y+ transform.localScale.x/2, 
+                screenCoords.y = Random.Range(fieldSize[1] + snakeCoords.y + transform.localScale.x/2, 
                     fieldCoords[1].y- transform.localScale.x/ 1.5f);
             }
             else
             {
                 screenCoords.y = Random.Range(fieldCoords[0].y + transform.localScale.x/ 1.5f,
-                   snakeController.transform.GetChild(0).position.y- fieldSize[0] - transform.localScale.x/ 1.5f);
+                   snakeCoords.y- fieldSize[0] - transform.localScale.x/ 1.5f);
             }
         }
         return screenCoords;

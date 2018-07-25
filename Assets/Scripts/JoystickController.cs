@@ -9,13 +9,18 @@ public class JoystickController : MonoBehaviour, IDragHandler, IPointerUpHandler
 
     Vector2 joysticDirection = new Vector2(0, 1);
     bool isPressed = false;
+    Transform joystick;
 
-    public void OnDrag(PointerEventData eventData)
+    void Start()
     {
+        joystick = transform.GetChild(0);
+    }
+
+    public void OnDrag(PointerEventData eventData)    {
         //gets vector for direction by moving joystic really far and then clampining it
-        transform.GetChild(0).position =eventData.position;
-        transform.GetChild(0).localPosition = Vector2.ClampMagnitude(transform.GetChild(0).localPosition*100, 30);
-        joysticDirection = new Vector2(transform.GetChild(0).localPosition.x, transform.GetChild(0).localPosition.y).normalized;
+        joystick.position =eventData.position;
+        joystick.localPosition = Vector2.ClampMagnitude(joystick.localPosition*100, 30);
+        joysticDirection = joystick.localPosition.normalized;
 
     }
 

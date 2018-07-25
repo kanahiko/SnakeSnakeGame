@@ -4,15 +4,16 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class MobileControls : MonoBehaviour {
+public class MobileControls : MonoBehaviour
+{
 
     public JoystickController joystick;
 
     //direction of joystick controll
-    public static Vector2 direction =new Vector2(0,1);
+    public static Vector2 direction = new Vector2(0, 1);
 
     ///value for SmoothDamp for changing direction
-    [Range(0,1)]
+    [Range(0, 1)]
     public float turnTime = 0.5f;
 
     //value for SmoothDamp for moving snake
@@ -21,7 +22,7 @@ public class MobileControls : MonoBehaviour {
 
 
     //flag and time double escape for app closing
-    bool escapePress=false;
+    bool escapePress = false;
     float escapeTime = 0;
 
     //flag for pressing AccelerationButton
@@ -42,11 +43,12 @@ public class MobileControls : MonoBehaviour {
     {
         //if in main menu load record
         isInGame = SceneManager.GetActiveScene() != SceneManager.GetSceneByName("MainMenu");
-        RecordText.text ="Record: "+PlayerPrefs.GetInt("Record score", 0);
+        RecordText.text = "Record: " + PlayerPrefs.GetInt("Record score", 0);
     }
 
     // Update is called once per frame
-    void Update () {
+    void Update()
+    {
         //if not in game then check for double escape
         //else show pause menu or exit pause menu
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -70,52 +72,47 @@ public class MobileControls : MonoBehaviour {
                         escapeTime = 0;
                     }
                 }
+                return;
             }
             else
             {
                 pauseMenu.gameObject.SetActive(!pauseMenu.gameObject.activeSelf);
-                Time.timeScale = pauseMenu.gameObject.activeSelf ? 0:1;
+                Time.timeScale = pauseMenu.gameObject.activeSelf ? 0 : 1;
             }
         }
 
-        if (isInGame)
+        if (isInGame && !GameMaster.hasCollided && Time.timeScale != 0)
         {
             if (direction != joystick.GetJoysticDirection())
             {
-                if (Mathf.Abs(Vector2.Angle(direction, joystick.GetJoysticDirection())) > 95)
+                // if angle between direction and joystic is too big
+                //split it into two stages
+                if (Vector2.Angle(direction, joystick.GetJoysticDirection()) > 96)
                 {
                     direction = Vector2.Lerp(direction, new Vector2(joystick.GetJoysticDirection().y, -joystick.GetJoysticDirection().x), turnTime);
-                    //direction = Vector2.SmoothDamp(direction, new Vector2(joystick.GetJoysticDirection().y, -joystick.GetJoysticDirection().x), ref velocity, turnTime, smoothTime, Time.deltaTime);
                 }
                 else
                 {
                     direction = Vector2.Lerp(direction, joystick.GetJoysticDirection(), turnTime);
-                    // direction = Vector2.SmoothDamp(direction, joystick.GetJoysticDirection(), ref velocity, turnTime, smoothTime, Time.deltaTime);
                 }
-                //direction = Vector2.MoveTowards(direction, joystick.GetJoysticDirection(), turnTime);
-                //direction.x = Mathf.SmoothStep(direction.x, joystick.GetJoysticDirection().x, turnTime);
-                //direction.y = Mathf.SmoothStep(direction.y, joystick.GetJoysticDirection().y, turnTime);
-                //
             }
 
 
 
             //making camera not go over field
-            Vector3 camPosition = new Vector3(0,0,-10);
-            //if snake position is over field border - quarter of screen
-            //same for y
+            Vector3 camPosition = new Vector3(0, 0, -10);
             float[] fieldSize = new float[2];
-            fieldSize[0] = transform.GetComponent<GameMaster>().fieldCoords[1].x/2;
-            fieldSize[1] = transform.GetComponent<GameMaster>().fieldCoords[1].y/2;
-            // Debug.Log(fieldSize[0]+ " "+fieldSize[1]+" "+ GameMaster.snake.transform.position+" "+ transform.GetComponent<GameMaster>().fieldCoords[0]+ " " + transform.GetComponent<GameMaster>().fieldCoords[1]);
+            fieldSize[0] = GameMaster.fieldCoords[1].x / 2;
+            fieldSize[1] = GameMaster.fieldCoords[1].y / 2;
 
-            if (GameMaster.snake.transform.position.x < transform.GetComponent<GameMaster>().fieldCoords[0].x+(fieldSize[0]))
+            //if snake position is over field border - middle of a screen
+            if (GameMaster.snake.transform.position.x < GameMaster.fieldCoords[0].x + (fieldSize[0]))
             {
-                camPosition.x = transform.GetComponent<GameMaster>().fieldCoords[0].x + ( fieldSize[0]);
+                camPosition.x = GameMaster.fieldCoords[0].x + fieldSize[0];
             }
-            else if(GameMaster.snake.transform.position.x > transform.GetComponent<GameMaster>().fieldCoords[1].x - ( fieldSize[0]))
+            else if (GameMaster.snake.transform.position.x > fieldSize[0])
             {
-                camPosition.x = transform.GetComponent<GameMaster>().fieldCoords[1].x - ( fieldSize[0]);
+                camPosition.x = fieldSize[0];
             }
             else
             {
@@ -123,20 +120,20 @@ public class MobileControls : MonoBehaviour {
             }
 
 
-          //  Debug.Log(transform.GetComponent<GameMaster>().fieldCoords[0].y + fieldSize[1]);
-            if (GameMaster.snake.transform.position.y < transform.GetComponent<GameMaster>().fieldCoords[0].y +  fieldSize[1])
+            //same for y
+            if (GameMaster.snake.transform.position.y < GameMaster.fieldCoords[0].y + fieldSize[1])
             {
-                camPosition.y = transform.GetComponent<GameMaster>().fieldCoords[0].y +  fieldSize[1];
+                camPosition.y = GameMaster.fieldCoords[0].y + fieldSize[1];
             }
-            else if (GameMaster.snake.transform.position.y > transform.GetComponent<GameMaster>().fieldCoords[1].y -  fieldSize[1])
+            else if (GameMaster.snake.transform.position.y > fieldSize[1])
             {
-                camPosition.y = transform.GetComponent<GameMaster>().fieldCoords[1].y -  fieldSize[1];
+                camPosition.y = fieldSize[1];
             }
             else
             {
                 camPosition.y = GameMaster.snake.transform.position.y;
             }
-            
+
             Camera.main.transform.position = camPosition;
 
             //fps display
@@ -166,11 +163,11 @@ public class MobileControls : MonoBehaviour {
         isAccelerated = value;
         if (value)
         {
-            AccButtonImage.color = new Color32(240, 52, 51, 255);
+            AccButtonImage.color = new Color32(240, 52, 51, 127);
         }
         else
         {
-            AccButtonImage.color = Color.white;
+            AccButtonImage.color = new Color32(255, 255, 255, 127);
         }
     }
 
@@ -189,7 +186,7 @@ public class MobileControls : MonoBehaviour {
 
     public void ChangeScore(int score)
     {
-        CurrentText.text = "Score: "+score;
+        CurrentText.text = "Score: " + score;
     }
 
 
@@ -200,7 +197,7 @@ public class MobileControls : MonoBehaviour {
 
     public void ExitButtonClick()
     {
-        if (isInGame)SaveScore();
+        if (isInGame) SaveScore();
         Application.Quit();
     }
 
@@ -226,14 +223,14 @@ public class MobileControls : MonoBehaviour {
 
     public void ShowCongratulationText()
     {
-        CongratulationText.color=Color.white;
+        CongratulationText.color = Color.white;
         IEnumerator corouting = AnimateCongratulationText(15);
         StartCoroutine(corouting);
     }
 
     IEnumerator AnimateCongratulationText(int seconds)
     {
-        yield return new WaitForSeconds(seconds/5f);
+        yield return new WaitForSeconds(seconds / 5f);
 
         for (int i = 0; i < seconds; i++)
         {
@@ -249,13 +246,13 @@ public class MobileControls : MonoBehaviour {
         pauseMenu.gameObject.SetActive(true);
         pauseMenu.transform.GetChild(1).GetComponent<Text>().text = "GAME OVER";
         pauseMenu.transform.GetChild(2).gameObject.SetActive(false);
+        pauseMenu.transform.GetChild(3).GetComponent<Text>().text = "Your Score: " + GameMaster.foodEaten;
         pauseMenu.transform.GetChild(3).gameObject.SetActive(true);
-        pauseMenu.transform.GetChild(3).GetComponent<Text>().text = "Your Score: " + GetComponent<GameMaster>().foodEaten;
     }
 
     void SaveScore()
     {
-        if (GetComponent<GameMaster>().foodEaten >= GameMaster.recordScore)
+        if (GameMaster.foodEaten >= GameMaster.recordScore)
         {
             PlayerPrefs.SetInt("Record score", GameMaster.recordScore);
         }
