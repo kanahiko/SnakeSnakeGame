@@ -93,6 +93,20 @@ public class GameMaster : MonoBehaviour {
         }
     }
 
+    void FixedUpdate()
+    {
+        //comaning snake to move or game over
+        if (!hasCollided)
+        {
+                snakeController.MoveSnake(mobileControls.direction, mobileControls.isAccelerated, mobileControls.smoothTime);
+        }
+        else
+        {
+            mobileControls.DeathScreen();
+        }
+    }
+
+
     void CreatePlayField()
     {
         //if already generated then return

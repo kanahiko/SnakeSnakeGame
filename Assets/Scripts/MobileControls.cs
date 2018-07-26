@@ -10,7 +10,7 @@ public class MobileControls : MonoBehaviour
     public JoystickController joystick;
 
     //direction of joystick controll
-    public static Vector2 direction = new Vector2(0, 1);
+    public Vector2 direction = new Vector2(0, 1);
 
     ///value for SmoothDamp for changing direction
     [Range(0, 1)]
@@ -26,7 +26,7 @@ public class MobileControls : MonoBehaviour
     float escapeTime = 0;
 
     //flag for pressing AccelerationButton
-    public static bool isAccelerated = false;
+    public bool isAccelerated = false;
 
     //for checking if in main menu or not
     bool isInGame = true;
@@ -38,6 +38,7 @@ public class MobileControls : MonoBehaviour
     public Text CongratulationText;
     public Text fpsCounter;
     public Image AccButtonImage;
+
 
     void Start()
     {
@@ -100,36 +101,16 @@ public class MobileControls : MonoBehaviour
 
 
             //making camera not go over field
-            Vector3 camPosition = new Vector3(0, 0, -10);
-            float[] fieldSize = new float[2];
-            fieldSize[0] = GameMaster.fieldCoords[1].x / 2;
-            fieldSize[1] = GameMaster.fieldCoords[1].y / 2;
+            Vector3 camPosition = Camera.main.transform.position;
 
             //if snake position is over field border - middle of a screen
-            if (GameMaster.snake.transform.position.x < GameMaster.fieldCoords[0].x + (fieldSize[0]))
-            {
-                camPosition.x = GameMaster.fieldCoords[0].x + fieldSize[0];
-            }
-            else if (GameMaster.snake.transform.position.x > fieldSize[0])
-            {
-                camPosition.x = fieldSize[0];
-            }
-            else
+            if ((GameMaster.snake.transform.position.x > GameMaster.fieldCoords[0].x + GameMaster.fieldCoords[1].x / 2) &&(GameMaster.snake.transform.position.x < GameMaster.fieldCoords[1].x / 2))
             {
                 camPosition.x = GameMaster.snake.transform.position.x;
             }
 
-
             //same for y
-            if (GameMaster.snake.transform.position.y < GameMaster.fieldCoords[0].y + fieldSize[1])
-            {
-                camPosition.y = GameMaster.fieldCoords[0].y + fieldSize[1];
-            }
-            else if (GameMaster.snake.transform.position.y > fieldSize[1])
-            {
-                camPosition.y = fieldSize[1];
-            }
-            else
+            if ((GameMaster.snake.transform.position.y > GameMaster.fieldCoords[0].y + GameMaster.fieldCoords[1].y / 2) &&(GameMaster.snake.transform.position.y < GameMaster.fieldCoords[1].y / 2))
             {
                 camPosition.y = GameMaster.snake.transform.position.y;
             }
@@ -140,23 +121,6 @@ public class MobileControls : MonoBehaviour
             fpsCounter.text = ((int)(1f / Time.unscaledDeltaTime)).ToString();
         }
     }
-
-    void FixedUpdate()
-    {
-        //comaning snake to move or game over
-        if (isInGame)
-        {
-            if (!GameMaster.hasCollided)
-            {
-                GameMaster.snakeController.MoveSnake(direction, isAccelerated, smoothTime);
-            }
-            else
-            {
-                DeathScreen();
-            }
-        }
-    }
-
 
     public void AcceleartionButtonPress(bool value)
     {
