@@ -221,4 +221,18 @@ public class MobileControls : MonoBehaviour
             PlayerPrefs.SetInt("Record score", GameMaster.recordScore);
         }
     }
+
+    public void ResetScore()
+    {
+        RecordText.text = "Record: 0";
+        PlayerPrefs.DeleteAll();
+    }
+
+    void OnApplicationQuit()
+    {
+        if (isInGame)
+        {
+            SaveScore();
+        }
+    }
 }
