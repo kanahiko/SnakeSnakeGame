@@ -13,8 +13,8 @@ public class MobileControls : MonoBehaviour
     public Vector2 direction = new Vector2(0, 1);
 
     ///value for SmoothDamp for changing direction
-    [Range(0, 1)]
-    public float turnTime = 0.5f;
+    [Range(0, 3)]
+    public float turnTime = 2.2f;
 
     //value for SmoothDamp for moving snake
     [Range(0, 1)]
@@ -88,14 +88,15 @@ public class MobileControls : MonoBehaviour
             {
                 // if angle between direction and joystic is too big
                 //split it into two stages
-                if (Vector2.Angle(direction, joystick.GetJoysticDirection()) > 96)
-                {
-                    direction = Vector2.Lerp(direction, new Vector2(joystick.GetJoysticDirection().y, -joystick.GetJoysticDirection().x), turnTime);
-                }
+                //if (Vector2.Angle(direction, joystick.GetJoysticDirection()) > 100)
+                //  {
+                direction = Vector3.RotateTowards(direction, joystick.GetJoysticDirection(), turnTime*Time.deltaTime, 0.0f);
+                 //   direction = Vector2.Lerp(direction, new Vector2(joystick.GetJoysticDirection().y, -joystick.GetJoysticDirection().x), turnTime);
+              /*  }
                 else
                 {
                     direction = Vector2.Lerp(direction, joystick.GetJoysticDirection(), turnTime);
-                }
+                }*/
             }
 
 

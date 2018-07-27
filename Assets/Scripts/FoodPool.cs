@@ -37,6 +37,7 @@ public class FoodPool : MonoBehaviour {
     {
         for (int i = 0; i < transform.childCount; i++)
         {
+            transform.GetChild(0).gameObject.SetActive(false);
             foodPool.Enqueue(transform.GetChild(0).gameObject);
         }
     }

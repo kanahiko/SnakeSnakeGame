@@ -67,6 +67,10 @@ public class GameMaster : MonoBehaviour {
         blockContainer = new GameObject("BlockContainer");
         
         GenerateFood();
+        PositionFood();
+        PositionFood();
+        PositionFood();
+        PositionFood();
     }
 
     void FixedUpdate()
@@ -182,7 +186,7 @@ public class GameMaster : MonoBehaviour {
     {
         GameObject block = Instantiate(blockPrefab,blockContainer.transform);
         block.transform.position = GenerateCoords();
-    }
+    }    
 
     public void EatFood(GameObject food)
     {
@@ -226,31 +230,46 @@ public class GameMaster : MonoBehaviour {
         Vector2 snakeCoords = snakeController.transform.GetChild(0).position;
 
         //generating random x
-        screenCoords.x = Random.Range(fieldCoords[0].x+ transform.localScale.x/1.5f, fieldCoords[1].x-transform.localScale.x/ 1.5f);
-        //if that x is not under or below snake head then generate random y
-        if (screenCoords.x < snakeCoords.x - fieldSize[0] ||
-            screenCoords.x > snakeCoords.x+ fieldSize[0])
-        {
-            screenCoords.y= Random.Range(fieldCoords[0].y+ transform.localScale.x/ 1.5f, fieldCoords[1].y- transform.localScale.x/ 1.5f);
-;
-        }
-        else
-        {
-            //else if lower boundary of snake head is lower than lower boundary of field
-            //or if upper boundary of snake head below upper boundary of field and rando, number greater than 50
-            //then generate y above snake head
-            //otherwise below
-            if ((fieldCoords[0].y> snakeCoords.y - fieldSize[1]) ||
-               !(fieldCoords[1].y< snakeCoords.y + fieldSize[1]) &&( Random.Range(0,100)>50))
+        screenCoords.x = Random.Range(fieldCoords[0].x+ 1.5f, fieldCoords[1].x- 1.5f);
+        Collider[] hit;
+        int tries = 0;
+            //if that x is not under or below snake head then generate random y
+            if (screenCoords.x < snakeCoords.x - fieldSize[0] ||
+                screenCoords.x > snakeCoords.x + fieldSize[0])
             {
-                screenCoords.y = Random.Range(fieldSize[1] + snakeCoords.y + transform.localScale.x/2, 
-                    fieldCoords[1].y- transform.localScale.x/ 1.5f);
+                do
+                {
+                    screenCoords.y = Random.Range(fieldCoords[0].y + 1.5f, fieldCoords[1].y - 1.5f);
+                    hit = Physics.OverlapBox(screenCoords, snakeHead.transform.localScale / 2);
+                    tries++;
+                } while (hit.Length != 0 && tries < 100);
+
             }
             else
             {
-                screenCoords.y = Random.Range(fieldCoords[0].y + transform.localScale.x/ 1.5f,
-                   snakeCoords.y- fieldSize[0] - transform.localScale.x/ 1.5f);
-            }
+                //else if lower boundary of snake head is lower than lower boundary of field
+                //or if upper boundary of snake head below upper boundary of field and rando, number greater than 50
+                //then generate y above snake head
+                //otherwise below
+                if ((fieldCoords[0].y > snakeCoords.y - fieldSize[1]) ||
+                   !(fieldCoords[1].y < snakeCoords.y + fieldSize[1]) && (Random.Range(0, 100) > 50))
+                {
+                    do
+                    {
+                        screenCoords.y = Random.Range(snakeCoords.y + fieldSize[1] + 1.5f, fieldCoords[1].y - 1.5f);
+                        hit = Physics.OverlapBox(screenCoords, snakeHead.transform.localScale / 2);
+                        tries++;
+                    } while (hit.Length != 0 && tries < 100);
+                }
+                else
+                {
+                    do
+                    {
+                        screenCoords.y = Random.Range(fieldCoords[0].y + 1.5f, snakeCoords.y - fieldSize[0] - 1.5f);
+                        hit = Physics.OverlapBox(snakeHead.transform.position, snakeHead.transform.localScale / 2);
+                        tries++;
+                    } while (hit.Length != 0 && tries < 100);
+                }
         }
         return screenCoords;
     }    
