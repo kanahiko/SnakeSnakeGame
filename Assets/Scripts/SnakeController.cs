@@ -52,16 +52,8 @@ public class SnakeController : MonoBehaviour {
 
         //rotating snake towards the direction set by joytick and changing its position
         snakeHead.rotation = Quaternion.AngleAxis(Mathf.Atan2(-direction.x, direction.y) * Mathf.Rad2Deg, Vector3.forward);
-        snakeHead.position += snakeHead.up * Time.deltaTime * speed;
-
-        //if snake head outside field boundaries game over
-        if (snakeHead.position.x< GameMaster.fieldCoords[0].x +0.50f|| snakeHead.position.x> GameMaster.fieldCoords[1].x -0.50f||
-            snakeHead.position.y < GameMaster.fieldCoords[0].y +0.50f || snakeHead.position.y > GameMaster.fieldCoords[1].y-0.50f)
-        {
-            GameMaster.hasCollided = true;
-            return;
-        }
-
+        snakeHead.position += snakeHead.up * Time.deltaTime * speed;        
+        
         //moving each tail part
         for (int i = snakeTail.Count - 1; i > 0; i--)
         {

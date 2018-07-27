@@ -104,15 +104,15 @@ public class MobileControls : MonoBehaviour
             Vector3 camPosition = Camera.main.transform.position;
 
             //if snake position is over field border - middle of a screen
-            if ((GameMaster.snake.transform.position.x > GameMaster.fieldCoords[0].x + GameMaster.fieldCoords[1].x / 2) &&(GameMaster.snake.transform.position.x < GameMaster.fieldCoords[1].x / 2))
+            if ((GameMaster.snakeHead.transform.position.x > GameMaster.fieldCoords[0].x + GameMaster.fieldCoords[1].x / 2) &&(GameMaster.snakeHead.transform.position.x < GameMaster.fieldCoords[1].x / 2))
             {
-                camPosition.x = GameMaster.snake.transform.position.x;
+                camPosition.x = GameMaster.snakeHead.transform.position.x;
             }
 
             //same for y
-            if ((GameMaster.snake.transform.position.y > GameMaster.fieldCoords[0].y + GameMaster.fieldCoords[1].y / 2) &&(GameMaster.snake.transform.position.y < GameMaster.fieldCoords[1].y / 2))
+            if ((GameMaster.snakeHead.transform.position.y > GameMaster.fieldCoords[0].y + GameMaster.fieldCoords[1].y / 2) &&(GameMaster.snakeHead.transform.position.y < GameMaster.fieldCoords[1].y / 2))
             {
-                camPosition.y = GameMaster.snake.transform.position.y;
+                camPosition.y = GameMaster.snakeHead.transform.position.y;
             }
 
             Camera.main.transform.position = camPosition;

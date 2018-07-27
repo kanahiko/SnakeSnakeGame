@@ -235,7 +235,6 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\FoodPool.cs" />
     <Compile Include="Assets\Scripts\GameMaster.cs" />
-    <Compile Include="Assets\Scripts\InteractiveObjectsController.cs" />
     <Compile Include="Assets\Scripts\JoystickController.cs" />
     <Compile Include="Assets\Scripts\MobileControls.cs" />
     <Compile Include="Assets\Scripts\SnakeController.cs" />

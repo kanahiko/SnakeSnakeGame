@@ -14,12 +14,10 @@ public class GameMaster : MonoBehaviour {
     public FoodPool pool;
 
     public static SnakeController snakeController;
-    public static GameObject snake;
+    public static GameObject snakeHead;
     MobileControls mobileControls;
 
     public static bool hasCollided = false;
-
-    public static GameObject foodObj=null;
 
     public Material bgMat;
 
@@ -46,7 +44,6 @@ public class GameMaster : MonoBehaviour {
     {
         Time.timeScale = 1;
         hasCollided = false;
-        foodObj = null;
         isCongradulated = false;
         foodEaten = 0;
         snakeController = transform.GetComponent<SnakeController>();
@@ -54,7 +51,7 @@ public class GameMaster : MonoBehaviour {
         snakeController.DestroySnake();
         snakeController.CreateSnake();
 
-        snake = transform.GetChild(0).gameObject;
+        snakeHead = transform.GetChild(0).gameObject;
         mobileControls = GetComponent<MobileControls>();
 
          //pool
@@ -72,33 +69,41 @@ public class GameMaster : MonoBehaviour {
         GenerateFood();
     }
 
-    void LateUpdate()
-    {
-        //if ate food then do stuff and if it's bigger than record than record it
-        //also if first time over record in game show text
-        if (!hasCollided && foodObj!=null)
-        {
-            EatFood(foodObj);
-            foodObj = null;
-            if (foodEaten > recordScore)
-            {
-                recordScore = foodEaten;
-                mobileControls.ChangeRecordScore(recordScore);
-                if (!isCongradulated)
-                {
-                    isCongradulated = true;
-                    mobileControls.ShowCongratulationText();
-                }
-            }
-        }
-    }
-
     void FixedUpdate()
     {
         //comaning snake to move or game over
         if (!hasCollided)
         {
-                snakeController.MoveSnake(mobileControls.direction, mobileControls.isAccelerated, mobileControls.smoothTime);
+            snakeController.MoveSnake(mobileControls.direction, mobileControls.isAccelerated, mobileControls.smoothTime);
+
+            //if snake head outside field boundaries game over
+            if (snakeHead.transform.position.x < fieldCoords[0].x + 0.50f || snakeHead.transform.position.x > fieldCoords[1].x - 0.50f ||
+                snakeHead.transform.position.y < fieldCoords[0].y + 0.50f || snakeHead.transform.position.y > fieldCoords[1].y - 0.50f)
+            {
+                hasCollided = true;
+                mobileControls.DeathScreen();
+                return;
+            }
+
+            Collider[] hit = Physics.OverlapBox(snakeHead.transform.position, snakeHead.transform.localScale / 2);
+            for (int i = 0; i < hit.Length; i++)
+            {
+                if (hit[i].transform.tag=="food")
+                {
+                    if (hit[i].gameObject.activeSelf)
+                    {
+                        EatFood(hit[i].gameObject);
+                    }
+                }
+                else
+                {
+                    hasCollided = true;
+                    mobileControls.DeathScreen();
+                    return;
+
+                }
+            }
+
         }
         else
         {
@@ -189,6 +194,18 @@ public class GameMaster : MonoBehaviour {
         foodEaten++;
 
         mobileControls.ChangeScore(foodEaten);
+
+        if (foodEaten > recordScore)
+        {
+            recordScore = foodEaten;
+            mobileControls.ChangeRecordScore(recordScore);
+            if (!isCongradulated)
+            {
+                isCongradulated = true;
+                mobileControls.ShowCongratulationText();
+            }
+        }
+
 
         snakeController.IncreaseSpeed();
         snakeController.AddTailPart();
