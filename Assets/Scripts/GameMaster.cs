@@ -67,10 +67,6 @@ public class GameMaster : MonoBehaviour {
         blockContainer = new GameObject("BlockContainer");
         
         GenerateFood();
-        PositionFood();
-        PositionFood();
-        PositionFood();
-        PositionFood();
     }
 
     void FixedUpdate()
@@ -177,7 +173,7 @@ public class GameMaster : MonoBehaviour {
         GameObject food = pool.GetFood();
         if (food)
         {            
-            food.transform.position = GenerateCoords();
+            food.transform.position = GenerateCoords("food");
             food.SetActive(true);
         }
     }
@@ -185,7 +181,7 @@ public class GameMaster : MonoBehaviour {
     public void PositionBlock()
     {
         GameObject block = Instantiate(blockPrefab,blockContainer.transform);
-        block.transform.position = GenerateCoords();
+        block.transform.position = GenerateCoords("block");
     }    
 
     public void EatFood(GameObject food)
@@ -220,7 +216,7 @@ public class GameMaster : MonoBehaviour {
         PositionBlock();
     }
 
-    public Vector3 GenerateCoords()
+    public Vector3 GenerateCoords(string tag)
     {
         Vector2 screenCoords = new Vector2();
         float[] fieldSize = new float[2];
@@ -231,7 +227,7 @@ public class GameMaster : MonoBehaviour {
 
         //generating random x
         screenCoords.x = Random.Range(fieldCoords[0].x+ 1.5f, fieldCoords[1].x- 1.5f);
-        Collider[] hit;
+        List<Collider> hit = new List<Collider>();
         int tries = 0;
             //if that x is not under or below snake head then generate random y
             if (screenCoords.x < snakeCoords.x - fieldSize[0] ||
@@ -240,9 +236,10 @@ public class GameMaster : MonoBehaviour {
                 do
                 {
                     screenCoords.y = Random.Range(fieldCoords[0].y + 1.5f, fieldCoords[1].y - 1.5f);
-                    hit = Physics.OverlapBox(screenCoords, snakeHead.transform.localScale / 2);
+                    hit.AddRange(Physics.OverlapBox(screenCoords, snakeHead.transform.localScale / 2));
+                    hit.RemoveAll(x => x.transform.tag == tag);
                     tries++;
-                } while (hit.Length != 0 && tries < 100);
+                } while (hit.Count != 0 && tries < 100);
 
             }
             else
@@ -257,21 +254,22 @@ public class GameMaster : MonoBehaviour {
                     do
                     {
                         screenCoords.y = Random.Range(snakeCoords.y + fieldSize[1] + 1.5f, fieldCoords[1].y - 1.5f);
-                        hit = Physics.OverlapBox(screenCoords, snakeHead.transform.localScale / 2);
-                        tries++;
-                    } while (hit.Length != 0 && tries < 100);
-                }
+                        hit.RemoveAll(x => x.transform.tag == tag);
+                    tries++;
+                } while (hit.Count != 0 && tries < 100);
+            }
                 else
                 {
                     do
                     {
                         screenCoords.y = Random.Range(fieldCoords[0].y + 1.5f, snakeCoords.y - fieldSize[0] - 1.5f);
-                        hit = Physics.OverlapBox(snakeHead.transform.position, snakeHead.transform.localScale / 2);
-                        tries++;
-                    } while (hit.Length != 0 && tries < 100);
-                }
+                    hit.RemoveAll(x => x.transform.tag == tag);
+                    tries++;
+                } while (hit.Count != 0 && tries < 100);
+            }
         }
         return screenCoords;
-    }    
+    }
+    
 
 }
